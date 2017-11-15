@@ -17,6 +17,8 @@ from nltk import stem
 mainPath = '../data/'
 max_length = 0
 use_cuda = torch.cuda.is_available()
+if use_cuda:
+    print ('Using Cuda')
 
 def readData(file='MVP_ALL.csv'):
     global max_length

@@ -51,6 +51,9 @@ class Modeling(nn.Module):
         # output = embedded
         h_0 = Variable(torch.zeros(2, 1, self.hidden_size), requires_grad=False)
         c_0 = Variable(torch.zeros(2, 1, self.hidden_size), requires_grad=False)
+        h_0 = h_0.cuda() if use_cuda else h_0
+        c_0 = c_0.cuda() if use_cuda else c_0
+
         outputs, (h_n, c_n) = self.bilstm(input, (h_0, c_0))
         return outputs
 
