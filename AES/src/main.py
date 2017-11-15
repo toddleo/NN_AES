@@ -89,7 +89,7 @@ if __name__ == '__main__':
             optimizer.zero_grad()
 
             instances = trainset[sid:sid + config.batch_size]
-            print(instances[0][2])
+            # print(instances[0][2])
             data = np.asarray(
                 [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in instances])
 

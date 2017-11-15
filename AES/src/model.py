@@ -22,15 +22,15 @@ class AESModel (nn.Module):
     def forward(self, input):
 
         e0_o = self.e0(input)
-        print (e0_o.data.size())
+        # print (e0_o.data.size())
         m0_o = self.m0(e0_o)
-        print (m0_o.data.size())
+        # print (m0_o.data.size())
         a0_o = self.a0(m0_o)
-        print (a0_o.data.size())
+        # print (a0_o.data.size())
         concat = torch.cat([m0_o, m0_o * a0_o], 2)
-        print (concat.data.size())
+        # print (concat.data.size())
         m1_o = self.m1(concat)
-        print (m1_o.data.size())
+        # print (m1_o.data.size())
         o0_o = self.o0(m1_o.contiguous().view(len(input), -1))
-        print (o0_o.data.size())
+        # print (o0_o.data.size())
         return o0_o
