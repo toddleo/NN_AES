@@ -12,8 +12,8 @@ class AESModel (nn.Module):
     def __init__(self, config):
         super(AESModel, self).__init__()
         self.config = config
-        self.e0 = Embedding(config.embedding_size, config.hidden_size, config)
-        self.m0 = Modeling(config.hidden_size, config.hidden_size, config)
+        self.e0 = Embedding(config.embedding_size, config.embedding_output, config)
+        self.m0 = Modeling(config.embedding_output, config.hidden_size, config)
         self.a0 = Attn(2 * config.hidden_size, 2 * config.hidden_size, config.max_length, config, dropout_p=config.dropout)
         self.m1 = Modeling(4 * config.hidden_size, config.hidden_size, config)
         # self.m2 = Modeling(config.hidden_size, config.hidden_size, config)
@@ -22,14 +22,15 @@ class AESModel (nn.Module):
     def forward(self, input):
 
         e0_o = self.e0(input)
-
+        print (e0_o.data.size())
         m0_o = self.m0(e0_o)
-
+        print (m0_o.data.size())
         a0_o = self.a0(m0_o)
-
+        print (a0_o.data.size())
         concat = torch.cat([m0_o, m0_o * a0_o], 2)
-
+        print (concat.data.size())
         m1_o = self.m1(concat)
-        o0_o = self.o0(m1_o.contiguous().view(self.config.batch_size, -1))
-
+        print (m1_o.data.size())
+        o0_o = self.o0(m1_o.contiguous().view(len(input), -1))
+        print (o0_o.data.size())
         return o0_o
