@@ -49,8 +49,8 @@ class Modeling(nn.Module):
     def forward(self, input):
         # embedded = self.embedding(input).view(1, 1, -1)
         # output = embedded
-        h_0 = Variable(torch.zeros(2, self.config.batch_size, self.hidden_size), requires_grad=False)
-        c_0 = Variable(torch.zeros(2, self.config.batch_size, self.hidden_size), requires_grad=False)
+        h_0 = Variable(torch.zeros(2, len(input), self.hidden_size), requires_grad=False)
+        c_0 = Variable(torch.zeros(2, len(input), self.hidden_size), requires_grad=False)
         h_0 = h_0.cuda() if use_cuda else h_0
         c_0 = c_0.cuda() if use_cuda else c_0
 
