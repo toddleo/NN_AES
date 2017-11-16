@@ -7,7 +7,7 @@ import time
 import torch.optim as O
 import torch.nn as nn
 from torch.autograd import Variable
-from torch import LongTensor, FloatTensor
+from torch import LongTensor, FloatTensor, ByteTensor
 import torch.nn.functional as F
 import sklearn.metrics as sklm
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
             mask = np.asarray(
                 [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in instances])
-            mask = Variable(LongTensor(mask))
+            mask = ByteTensor(mask)
             mask = mask.cuda() if use_cuda else mask
 
             label = np.asarray([ins[1]-1 for ins in instances])

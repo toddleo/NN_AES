@@ -127,12 +127,12 @@ class Attn(nn.Module):
         # self.gru = nn.GRU(self.hidden_size, self.hidden_size)
         # self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, input):
+    def forward(self, input, mask):
         # embedded = self.embedding(input).view(1, 1, -1)
         # embedded = self.dropout(embedded)
 
         attn_weights = F.softmax(self.attn(input))
-
+        # attn_weights.data.masked_fill_(mask, -float('inf'))
         attn_out = torch.bmm(attn_weights, input)
 
         return attn_out, attn_weights
