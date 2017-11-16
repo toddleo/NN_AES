@@ -58,6 +58,58 @@ class Modeling(nn.Module):
         return outputs
 
 
+class SelfAttention(nn.Module):
+    def __init__(self, hidden_size, mask):
+        super(SelfAttention, self).__init__()
+
+        self.hidden_size = hidden_size
+        self.mask = mask
+
+
+    def get_mask(self):
+        pass
+
+    def forward(self, inputs):
+
+        if isinstance(inputs, PackedSequence):
+            # unpack output
+            inputs, lengths = pad_packed_sequence(inputs,
+                                                  batch_first=self.batch_first)
+        if self.batch_first:
+            batch_size, max_len = inputs.size()[:2]
+        else:
+            max_len, batch_size = inputs.size()[:2]
+
+        # apply attention layer
+        weights = torch.bmm(inputs,
+                            self.att_weights  # (1, hidden_size)
+                            .permute(1, 0)  # (hidden_size, 1)
+                            .unsqueeze(0)  # (1, hidden_size, 1)
+                            .repeat(batch_size, 1, 1)
+                            # (batch_size, hidden_size, 1)
+                            )
+
+        attentions = F.softmax(F.relu(weights.squeeze()))
+
+        # create mask based on the sentence lengths
+        mask = Variable(torch.ones(attentions.size())).cuda()
+        for i, l in enumerate(lengths):  # skip the first sentence
+            if l < max_len:
+                mask[i, l:] = 0
+
+        # apply mask and renormalize attention scores (weights)
+        masked = attentions * mask
+        _sums = masked.sum(-1).expand_as(attentions)  # sums per row
+        attentions = masked.div(_sums)
+
+        # apply attention weights
+        weighted = torch.mul(inputs, attentions.unsqueeze(-1).expand_as(inputs))
+
+        # get the final fixed vector representations of the sentences
+        representations = weighted.sum(1).squeeze()
+
+        return representations, attentions
+
 class Attn(nn.Module):
     def __init__(self, hidden_size, output_size, max_length, config, n_layers=1, dropout_p=0.2):
         super(Attn, self).__init__()
@@ -69,7 +121,7 @@ class Attn(nn.Module):
         self.config = config
 
         # self.embedding = nn.Embedding(self.output_size, self.hidden_size)
-        self.attn = nn.Linear(self.hidden_size, self.output_size)
+        self.attn = nn.Linear(self.hidden_size, max_length)
         # self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
         # self.dropout = nn.Dropout(self.dropout_p)
         # self.gru = nn.GRU(self.hidden_size, self.hidden_size)
@@ -81,7 +133,9 @@ class Attn(nn.Module):
 
         attn_weights = F.softmax(self.attn(input))
 
-        return attn_weights
+        attn_out = torch.bmm(attn_weights, input)
+
+        return attn_out, attn_weights
 
 
 class Output(nn.Module):
