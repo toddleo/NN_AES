@@ -8,6 +8,9 @@ import torch.optim as O
 import torch.nn as nn
 from torch.autograd import Variable
 from torch import LongTensor, FloatTensor
+import torch.nn.functional as F
+import sklearn.metrics as sklm
+
 
 from model import AESModel
 from ConfigFile import Configuration
@@ -112,12 +115,13 @@ if __name__ == '__main__':
             total_loss += loss.data[0]
             numOfBatch += 1
             numOfSamples += len(instances)
-            if numOfBatch % 10 == 0:
+            if numOfBatch % 1 == 0:
                 print("testing")
                 end = time.time()
                 total_test_loss = 0
+                predicts = []
                 for tid in range(0, len(testset), config.test_batch_size):
-                    test_instances = trainset[sid:sid + config.test_batch_size]
+                    test_instances = testset[tid:tid + config.test_batch_size]
                     test_data = np.asarray(
                         [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
                          test_instances])
@@ -129,10 +133,16 @@ if __name__ == '__main__':
                     true_label = true_label.cuda() if use_cuda else true_label
 
                     test_out = model.forward(test_data)
+                    values, predict = torch.max(F.softmax(test_out), 1)
+                    predict = predict.data.numpy()
+                    predicts.extend(predict)
                     test_loss = criterion(test_out, true_label)
                     total_test_loss = test_loss.data[0]
+
+
+                qwkappa = sklm.cohen_kappa_score([ins[1] - 1 for ins in testset], predicts, labels=[0, 1, 2, 3], weights='quadratic')
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
-                    total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(test_data)) + ", run time = " + str(end - start))
+                    total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(test_data)) + ", test_kappa = " + str(qwkappa) + ", run time = " + str(end - start))
                 start = time.time()
 
     print ("this is the end")
