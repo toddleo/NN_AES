@@ -155,6 +155,7 @@ if __name__ == '__main__':
                     total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(dev_data)) + ", run time = " + str(end - start))
                 start = time.time()
 
+        predicts = []
         for tid in range(0, len(testset), config.test_batch_size):
             test_instances = testset[tid:tid + config.test_batch_size]
             test_data = np.asarray(

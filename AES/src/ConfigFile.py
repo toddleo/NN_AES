@@ -5,7 +5,7 @@ class Configuration():
         self.hidden_size = 50
         self.embedding_output = 25
 
-        self.dropout = 0.3
+        self.dropout = 0.2
         self.output_size = 4
         self.epochs = 10
         self.init_lr = 0.5
