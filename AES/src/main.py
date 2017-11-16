@@ -115,7 +115,7 @@ if __name__ == '__main__':
             total_loss += loss.data[0]
             numOfBatch += 1
             numOfSamples += len(instances)
-            if numOfBatch % 1 == 0:
+            if numOfBatch % 10 == 0:
                 print("testing")
                 end = time.time()
                 total_test_loss = 0
