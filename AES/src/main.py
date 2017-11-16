@@ -32,8 +32,8 @@ def readData(file='MVP_ALL.csv'):
         essay = [w2i[stemmer.stem(x)] for x in word_tokenize(u.normalizeString(row['text']))]
         max_length = max(max_length, len(essay))
         yield (essay, row['score'], row['text'], np.ones(len(essay), dtype=np.int))
-        # if index >= 20:
-        #     break
+        if index >= 20:
+            break
 
 
 def split(data, test_size=0.2, shuffle=True, random_seed=42):
@@ -105,9 +105,8 @@ if __name__ == '__main__':
             data = Variable(LongTensor(data))
             data = data.cuda() if use_cuda else data
 
-            mask = np.asarray(
-                [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in instances])
-            mask = ByteTensor(mask)
+            mask = [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in instances]
+            mask = Variable(FloatTensor(mask))
             mask = mask.cuda() if use_cuda else mask
 
             label = np.asarray([ins[1]-1 for ins in instances])

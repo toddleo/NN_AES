@@ -124,7 +124,7 @@ class Attn(nn.Module):
         self.config = config
 
         # self.embedding = nn.Embedding(self.output_size, self.hidden_size)
-        self.attn = nn.Linear(self.hidden_size, max_length)
+        self.attn = nn.Linear(self.hidden_size, self.output_size)
         # self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
         # self.dropout = nn.Dropout(self.dropout_p)
         # self.gru = nn.GRU(self.hidden_size, self.hidden_size)
@@ -136,6 +136,14 @@ class Attn(nn.Module):
 
         attn_weights = F.softmax(self.attn(input))
         # attn_weights.data.masked_fill_(mask, -float('inf'))
+        mask = mask.unsqueeze(2).repeat(1, 1, self.output_size)
+
+
+        masked = attn_weights * mask
+        _sums = masked.sum(-1)
+        _sums = _sums.data.unsqueez(2).expand_as(attn_weights)  # sums per row
+        attn_weights = masked.div(_sums)
+
         attn_out = torch.bmm(attn_weights, input)
 
         return attn_out, attn_weights
