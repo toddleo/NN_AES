@@ -133,11 +133,17 @@ if __name__ == '__main__':
                     test_data = Variable(LongTensor(test_data))
                     test_data = test_data.cuda() if use_cuda else test_data
 
+                    test_mask = np.asarray(
+                        [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
+                         test_instances])
+                    test_mask = Variable(LongTensor(test_mask))
+                    test_mask = test_mask.cuda() if use_cuda else test_mask
+
                     true_label = np.asarray([ins[1] - 1 for ins in test_instances])
                     true_label = Variable(LongTensor(true_label))
                     true_label = true_label.cuda() if use_cuda else true_label
 
-                    test_out = model.forward(test_data)
+                    test_out = model.forward(test_data, test_mask)
                     values, predict = torch.max(F.softmax(test_out), 1)
                     predict = predict.cpu().data.numpy()
                     predicts.extend(predict)
