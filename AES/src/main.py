@@ -124,7 +124,7 @@ if __name__ == '__main__':
                     test_data = Variable(LongTensor(test_data))
                     test_data = test_data.cuda() if use_cuda else test_data
 
-                    true_label = np.asarray([ins[1] - 1 for ins in testset])
+                    true_label = np.asarray([ins[1] - 1 for ins in test_instances])
                     true_label = Variable(LongTensor(true_label))
                     true_label = true_label.cuda() if use_cuda else true_label
 
