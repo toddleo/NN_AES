@@ -72,14 +72,7 @@ if __name__ == '__main__':
 
     trainset, testset = split(data)
 
-    test_data = np.asarray(
-        [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in testset])
-    test_data = Variable(LongTensor(test_data))
-    test_data = test_data.cuda() if use_cuda else test_data
 
-    true_label = np.asarray([ins[1] - 1 for ins in testset])
-    true_label = Variable(LongTensor(true_label))
-    true_label = true_label.cuda() if use_cuda else true_label
 
     model = AESModel(config)
     if use_cuda:
@@ -122,11 +115,24 @@ if __name__ == '__main__':
             if numOfBatch % 10 == 0:
                 print("testing")
                 end = time.time()
-                test_out = model.forward(test_data)
-                test_loss = criterion(test_out, true_label)
+                total_test_loss = 0
+                for tid in range(0, len(testset), config.test_batch_size):
+                    test_instances = trainset[sid:sid + config.test_batch_size]
+                    test_data = np.asarray(
+                        [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
+                         test_instances])
+                    test_data = Variable(LongTensor(test_data))
+                    test_data = test_data.cuda() if use_cuda else test_data
 
+                    true_label = np.asarray([ins[1] - 1 for ins in testset])
+                    true_label = Variable(LongTensor(true_label))
+                    true_label = true_label.cuda() if use_cuda else true_label
+
+                    test_out = model.forward(test_data)
+                    test_loss = criterion(test_out, true_label)
+                    total_test_loss = test_loss.data[0]
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
-                    total_loss / numOfSamples) + ", test loss: " + str(test_loss.data[0] / len(test_data)) + ", run time = " + str(end - start))
+                    total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(test_data)) + ", run time = " + str(end - start))
                 start = time.time()
 
     print ("this is the end")

@@ -10,3 +10,4 @@ class Configuration():
         self.init_lr = 0.5
         self.embedding_size = 0
         self.embedding_output = 50
+        self.test_batch_size = 30
