@@ -82,8 +82,8 @@ if __name__ == '__main__':
         model.cuda()
 
     criterion = nn.CrossEntropyLoss()
-    # optimizer = O.Adadelta(model.parameters(), config.init_lr)
-    optimizer = O.SGD(model.parameters(), lr = 0.01, momentum=0.9)
+    optimizer = O.Adadelta(model.parameters(), config.init_lr)
+    # optimizer = O.SGD(model.parameters(), lr = 0.01, momentum=0.9)
 
     for epoch in range(0, config.epochs):
         total_loss = 0
