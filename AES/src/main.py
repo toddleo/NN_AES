@@ -140,7 +140,7 @@ if __name__ == '__main__':
                     dev_mask = Variable(LongTensor(dev_mask))
                     dev_mask = dev_mask.cuda() if use_cuda else dev_mask
 
-                    true_label = np.asarray([ins[1] - 1 for ins in test_instances])
+                    true_label = np.asarray([ins[1] - 1 for ins in dev_instances])
                     true_label = Variable(LongTensor(true_label))
                     true_label = true_label.cuda() if use_cuda else true_label
 
@@ -151,10 +151,8 @@ if __name__ == '__main__':
                     test_loss = criterion(test_out, true_label)
                     total_test_loss = test_loss.data[0]
 
-
-                qwkappa = sklm.cohen_kappa_score([ins[1] - 1 for ins in devset], predicts, labels=[0, 1, 2, 3], weights='quadratic')
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
-                    total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(dev_data)) + ", test_kappa = " + str(qwkappa) + ", run time = " + str(end - start))
+                    total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(dev_data)) + ", run time = " + str(end - start))
                 start = time.time()
 
     for tid in range(0, len(testset), config.test_batch_size):
