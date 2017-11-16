@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
                     test_out = model.forward(test_data)
                     values, predict = torch.max(F.softmax(test_out), 1)
-                    predict = predict.data.numpy()
+                    predict = predict.cpu().data.numpy()
                     predicts.extend(predict)
                     test_loss = criterion(test_out, true_label)
                     total_test_loss = test_loss.data[0]
