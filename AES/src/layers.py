@@ -45,14 +45,14 @@ class Modeling(nn.Module):
         self.dropout_p = dropout_p
 
         # self.embedding = nn.Embedding(input_size, hidden_size)
-        self.bilstm = nn.LSTM(batch_first=True, input_size=input_size, hidden_size=hidden_size, num_layers=n_layers, bidirectional=True)
+        self.bilstm = nn.LSTM(batch_first=True, input_size=input_size, hidden_size=hidden_size, num_layers=n_layers)
         self.dropout = nn.Dropout(self.dropout_p)
 
     def forward(self, input):
         # embedded = self.embedding(input).view(1, 1, -1)
         # output = embedded
-        h_0 = Variable(torch.zeros(2, len(input), self.hidden_size), requires_grad=False)
-        c_0 = Variable(torch.zeros(2, len(input), self.hidden_size), requires_grad=False)
+        h_0 = Variable(torch.zeros(1, len(input), self.hidden_size), requires_grad=False)
+        c_0 = Variable(torch.zeros(1, len(input), self.hidden_size), requires_grad=False)
         h_0 = h_0.cuda() if use_cuda else h_0
         c_0 = c_0.cuda() if use_cuda else c_0
 

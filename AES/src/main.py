@@ -155,31 +155,31 @@ if __name__ == '__main__':
                     total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(dev_data)) + ", run time = " + str(end - start))
                 start = time.time()
 
-    for tid in range(0, len(testset), config.test_batch_size):
-        test_instances = testset[tid:tid + config.test_batch_size]
-        test_data = np.asarray(
-            [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
-             test_instances])
-        test_data = Variable(LongTensor(test_data))
-        test_data = test_data.cuda() if use_cuda else test_data
+        for tid in range(0, len(testset), config.test_batch_size):
+            test_instances = testset[tid:tid + config.test_batch_size]
+            test_data = np.asarray(
+                [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
+                 test_instances])
+            test_data = Variable(LongTensor(test_data))
+            test_data = test_data.cuda() if use_cuda else test_data
 
-        test_mask = np.asarray(
-            [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
-             test_instances])
-        test_mask = Variable(LongTensor(test_mask))
-        test_mask = test_mask.cuda() if use_cuda else test_mask
+            test_mask = np.asarray(
+                [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
+                 test_instances])
+            test_mask = Variable(LongTensor(test_mask))
+            test_mask = test_mask.cuda() if use_cuda else test_mask
 
-        true_label = np.asarray([ins[1] - 1 for ins in test_instances])
-        true_label = Variable(LongTensor(true_label))
-        true_label = true_label.cuda() if use_cuda else true_label
+            true_label = np.asarray([ins[1] - 1 for ins in test_instances])
+            true_label = Variable(LongTensor(true_label))
+            true_label = true_label.cuda() if use_cuda else true_label
 
-        test_out = model.forward(test_data, test_mask)
-        values, predict = torch.max(F.softmax(test_out), 1)
-        predict = predict.cpu().data.numpy()
-        predicts.extend(predict)
-        test_loss = criterion(test_out, true_label)
-        total_test_loss = test_loss.data[0]
+            test_out = model.forward(test_data, test_mask)
+            values, predict = torch.max(F.softmax(test_out), 1)
+            predict = predict.cpu().data.numpy()
+            predicts.extend(predict)
+            test_loss = criterion(test_out, true_label)
+            total_test_loss = test_loss.data[0]
 
-    qwkappa = sklm.cohen_kappa_score([ins[1] - 1 for ins in testset], predicts, labels=[0, 1, 2, 3],
-                                     weights='quadratic')
-    print ("kappa = " + str(qwkappa))
+        qwkappa = sklm.cohen_kappa_score([ins[1] - 1 for ins in testset], predicts, labels=[0, 1, 2, 3],
+                                         weights='quadratic')
+        print ("kappa = " + str(qwkappa))

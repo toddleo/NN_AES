@@ -14,10 +14,10 @@ class AESModel (nn.Module):
         self.config = config
         self.e0 = Embedding(config.embedding_size, config.embedding_output, config)
         self.m0 = Modeling(config.embedding_output, config.hidden_size, config)
-        self.a0 = Attn(2 * config.hidden_size, 2 * config.hidden_size, config.max_length, config, dropout_p=config.dropout)
-        self.m1 = Modeling(2 * config.hidden_size, config.hidden_size, config)
+        self.a0 = Attn(config.hidden_size, 2 * config.hidden_size, config.max_length, config, dropout_p=config.dropout)
+        self.m1 = Modeling(config.hidden_size, config.hidden_size, config)
         # self.m2 = Modeling(config.hidden_size, config.hidden_size, config)
-        self.o0 = Output(2 * config.hidden_size * config.max_length, config)
+        self.o0 = Output(config.hidden_size * config.max_length, config)
         # self.o0 = Output((2 * config.hidden_size + config.max_length) * config.max_length, config)
 
     def forward(self, input, mask):
