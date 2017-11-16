@@ -37,14 +37,16 @@ class Embedding(nn.Module):
 
 
 class Modeling(nn.Module):
-    def __init__(self, input_size, hidden_size, config, n_layers=1):
+    def __init__(self, input_size, hidden_size, config, n_layers=1, dropout_p=0.2):
         super(Modeling, self).__init__()
         self.n_layers = n_layers
         self.hidden_size = hidden_size
         self.config = config
+        self.dropout_p = dropout_p
 
         # self.embedding = nn.Embedding(input_size, hidden_size)
         self.bilstm = nn.LSTM(batch_first=True, input_size=input_size, hidden_size=hidden_size, num_layers=n_layers, bidirectional=True)
+        self.dropout = nn.Dropout(self.dropout_p)
 
     def forward(self, input):
         # embedded = self.embedding(input).view(1, 1, -1)
@@ -55,6 +57,7 @@ class Modeling(nn.Module):
         c_0 = c_0.cuda() if use_cuda else c_0
 
         outputs, (h_n, c_n) = self.bilstm(input, (h_0, c_0))
+        outputs = self.dropout(outputs)
         return outputs
 
 
