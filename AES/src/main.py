@@ -32,8 +32,8 @@ def readData(file='MVP_ALL.csv'):
         essay = [w2i[stemmer.stem(x)] for x in word_tokenize(u.normalizeString(row['text']))]
         max_length = max(max_length, len(essay))
         yield (essay, row['score'], row['text'], np.ones(len(essay), dtype=np.int))
-        if index >= 20:
-            break
+        # if index >= 20:
+        #     break
 
 
 def split(data, test_size=0.2, shuffle=True, random_seed=42):
@@ -95,6 +95,7 @@ if __name__ == '__main__':
         # for instance in train:
         print("Start Training:" + str(epoch))
         for sid in range(0, len(trainset), config.batch_size):
+            model.train()
             optimizer.zero_grad()
 
             instances = trainset[sid:sid + config.batch_size]
@@ -113,7 +114,7 @@ if __name__ == '__main__':
             label = Variable(LongTensor(label))
             label = label.cuda() if use_cuda else label
 
-            output = model.forward(data, mask)
+            output, attention = model.forward(data, mask)
             loss = criterion(output, label)
             loss.backward()
             optimizer.step()
@@ -123,63 +124,63 @@ if __name__ == '__main__':
             numOfSamples += len(instances)
             if numOfBatch % 10 == 0:
                 end = time.time()
-                total_test_loss = 0
+                total_dev_loss = 0
                 predicts = []
+                model.eval()
                 for tid in range(0, len(devset), config.test_batch_size):
                     dev_instances = testset[tid:tid + config.test_batch_size]
-                    dev_data = np.asarray(
+                    data = np.asarray(
                         [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
                          dev_instances])
-                    dev_data = Variable(LongTensor(dev_data))
-                    dev_data = dev_data.cuda() if use_cuda else dev_data
+                    data = Variable(LongTensor(data))
+                    data = data.cuda() if use_cuda else data
 
-                    dev_mask = np.asarray(
+                    mask = np.asarray(
                         [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
                          dev_instances])
-                    dev_mask = Variable(LongTensor(dev_mask))
-                    dev_mask = dev_mask.cuda() if use_cuda else dev_mask
+                    mask = Variable(FloatTensor(mask))
+                    mask = mask.cuda() if use_cuda else mask
 
                     true_label = np.asarray([ins[1] - 1 for ins in dev_instances])
                     true_label = Variable(LongTensor(true_label))
                     true_label = true_label.cuda() if use_cuda else true_label
 
-                    test_out = model.forward(dev_data, dev_mask)
-                    values, predict = torch.max(F.softmax(test_out), 1)
+                    output, attention  = model.forward(data, mask)
+                    values, predict = torch.max(F.softmax(output), 1)
                     predict = predict.cpu().data.numpy()
                     predicts.extend(predict)
-                    test_loss = criterion(test_out, true_label)
-                    total_test_loss += test_loss.data[0]
+                    dev_loss = criterion(output, true_label)
+                    total_dev_loss += dev_loss.data[0]
 
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
-                    total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(dev_data)) + ", run time = " + str(end - start))
+                    total_loss / numOfSamples) + ", test loss: " + str(total_dev_loss / len(data)) + ", run time = " + str(end - start))
                 start = time.time()
 
         predicts = []
+        # attentions = []
+        model.eval()
         for tid in range(0, len(testset), config.test_batch_size):
             test_instances = testset[tid:tid + config.test_batch_size]
-            test_data = np.asarray(
+            data = np.asarray(
                 [np.pad(ins[0], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
                  test_instances])
-            test_data = Variable(LongTensor(test_data))
-            test_data = test_data.cuda() if use_cuda else test_data
+            data = Variable(LongTensor(data))
+            data = data.cuda() if use_cuda else data
 
-            test_mask = np.asarray(
+            mask = np.asarray(
                 [np.pad(ins[3], (0, config.max_length - len(ins[0])), 'constant', constant_values=0) for ins in
                  test_instances])
-            test_mask = Variable(LongTensor(test_mask))
-            test_mask = test_mask.cuda() if use_cuda else test_mask
+            mask = Variable(FloatTensor(mask))
+            mask = mask.cuda() if use_cuda else mask
 
-            true_label = np.asarray([ins[1] - 1 for ins in test_instances])
-            true_label = Variable(LongTensor(true_label))
-            true_label = true_label.cuda() if use_cuda else true_label
 
-            test_out = model.forward(test_data, test_mask)
-            values, predict = torch.max(F.softmax(test_out), 1)
+            output, attention  = model.forward(data, mask)
+            values, predict = torch.max(F.softmax(output), 1)
             predict = predict.cpu().data.numpy()
             predicts.extend(predict)
-            test_loss = criterion(test_out, true_label)
-            total_test_loss = test_loss.data[0]
+            # attentions.extend(test_attention)
 
         qwkappa = sklm.cohen_kappa_score([ins[1] - 1 for ins in testset], predicts, labels=[0, 1, 2, 3],
                                          weights='quadratic')
+        torch.save(model.state_dict(), '../models/' + str(epoch) + '.pkl')
         print ("kappa = " + str(qwkappa))
