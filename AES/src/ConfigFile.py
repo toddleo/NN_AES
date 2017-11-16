@@ -5,7 +5,7 @@ class Configuration():
         self.max_length = 0
         self.dropout = 0.2
         self.output_size = 4
-        self.batch_size = 30
+        self.batch_size = 10
         self.epochs = 100
         self.init_lr = 0.5
         self.embedding_size = 0
