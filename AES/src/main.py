@@ -149,7 +149,7 @@ if __name__ == '__main__':
                     predict = predict.cpu().data.numpy()
                     predicts.extend(predict)
                     test_loss = criterion(test_out, true_label)
-                    total_test_loss = test_loss.data[0]
+                    total_test_loss += test_loss.data[0]
 
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
                     total_loss / numOfSamples) + ", test loss: " + str(total_test_loss / len(dev_data)) + ", run time = " + str(end - start))
