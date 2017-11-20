@@ -14,7 +14,7 @@ import sklearn.metrics as sklm
 
 from model import AESModel
 from ConfigFile import Configuration
-from nltk import word_tokenize
+from nltk import word_tokenize, sent_tokenize
 from nltk import stem
 
 mainPath = '../data/'
@@ -26,14 +26,15 @@ if use_cuda:
 def readData(file='MVP_ALL.csv'):
     global max_length
     stemmer = stem.porter.PorterStemmer()
-    df = pd.read_csv(mainPath + file)
+    df = pd.read_csv(mainPath + file, encoding='utf-8')
     for index, row in df.iterrows():
-
-        essay = [w2i[stemmer.stem(x)] for x in word_tokenize(u.normalizeString(row['text']))]
+        essay = [line for line in row['text'].split('\n')]
+        essay = [[w2i[stemmer.stem(x)] for x in word_tokenize(u.normalizeString(sent))] for sent in sent_tokenize(row['text'])]
+        # essay = [w2i[stemmer.stem(x)] for x in word_tokenize(u.normalizeString(row['text']))]
         max_length = max(max_length, len(essay))
         yield (essay, row['score'], row['text'], np.ones(len(essay), dtype=np.int))
-        # if index >= 20:
-        #     break
+        if index >= 20:
+            break
 
 
 def split(data, test_size=0.2, shuffle=True, random_seed=42):
