@@ -173,7 +173,7 @@ if __name__ == '__main__':
                     total_dev_loss += dev_loss.data[0] * len(dev_instances)
 
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
-                    total_loss / numOfSamples) + ", test loss: " + str(total_dev_loss / len(data)) + ", run time = " + str(end - start))
+                    total_loss / numOfSamples) + ", test loss: " + str(total_dev_loss / len(devset)) + ", run time = " + str(end - start))
                 start = time.time()
 
         predicts = []
