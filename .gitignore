@@ -102,3 +102,4 @@ ENV/
 
 AES/.idea
 .DS_Store
+*.pkl

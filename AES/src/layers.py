@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-
+from functools import reduce
+from operator import mul
 
 if torch.cuda.is_available():
     use_cuda = True
@@ -99,9 +100,18 @@ class Output(nn.Module):
         # self.gru = nn.GRU(self.hidden_size, self.hidden_size)
         # self.out = nn.Linear(self.hidden_size, self.output_size)
 
+    def flatten(self, tensor, keep):
+        fixed_shape = list(tensor.size())
+        start = len(fixed_shape) - keep
+        left = reduce(mul, [fixed_shape[i] for i in range(start)])
+        out_shape = [left] + [fixed_shape[i] for i in range(start, len(fixed_shape))]
+        flat = tensor.view(out_shape)
+        return flat
+
     def forward(self, input):
         # embedded = self.embedding(input).view(1, 1, -1)
         # embedded = self.dropout(embedded)
+        # input = self.flatten(input, 1)
         logits = self.linear(input)
         logits = logits
         return logits
