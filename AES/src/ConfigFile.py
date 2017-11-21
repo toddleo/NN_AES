@@ -1,8 +1,8 @@
 class Configuration():
     def __init__(self):
-        self.batch_size = 20
-        self.test_batch_size = 20
-        self.hidden_size = 20
+        self.batch_size = 1
+        self.test_batch_size = 1
+        self.hidden_size = 50
         self.embedding_output = 20
 
         self.dropout = 0.2

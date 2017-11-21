@@ -156,7 +156,7 @@ if __name__ == '__main__':
             total_loss += loss.data[0] * len(instances)
             numOfBatch += 1
             numOfSamples += len(instances)
-            if numOfBatch % 10 == 0:
+            if numOfBatch % 500 == 0:
                 end = time.time()
                 total_dev_loss = 0
                 predicts = []
