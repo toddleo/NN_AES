@@ -184,8 +184,8 @@ if __name__ == '__main__':
     if use_cuda:
         model.cuda()
 
-    # criterion = nn.CrossEntropyLoss()
-    criterion = nn.MSELoss()
+    criterion = nn.CrossEntropyLoss()
+    # criterion = nn.MSELoss()
     # optimizer = O.Adadelta(model.parameters(), config.init_lr)
     # optimizer = O.Adam(model.parameters())
     # optimizer = O.SGD(model.parameters(), lr = 0.01)
