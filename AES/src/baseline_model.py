@@ -15,7 +15,9 @@ class BaseLineModel (nn.Module):
         super(BaseLineModel, self).__init__()
         self.config = config
         self.e0 = Embedding(config.vocab_size, config.embedding_output, config)
-        self.c0 = Conv(config.embedding_output, config.num_of_filters, config.window_size, config)
+        self.c0 = Conv(1, config.num_of_filters, (config.window_size, config.embedding_output), config)
+        # self.c0 = Conv(config.embedding_output, config.num_of_filters, config.window_size, config)
+
         # self.m0 = Modeling(config.embedding_output, config.hidden_size, config)
         self.a0 = Attn(config.num_of_filters, config.num_of_filters, config)
         self.m0 = Modeling(config.num_of_filters, config.hidden_size, config)
@@ -26,10 +28,12 @@ class BaseLineModel (nn.Module):
         # mask = mask.unsqueeze(3).repeat(1, 1, 1, self.config.embedding_output)
         # print(input.data.size())
         e0_o = self.e0(input.view(-1, self.config.max_length_sent))
-        e0_o = e0_o.transpose(1, 2)
+        #e0_o = e0_o.transpose(1, 2)
+        e0_o = e0_o.unsqueeze(1)
         c0_o = self.c0(e0_o)
+        #c0_o = c0_o.transpose(1, 2)
+        c0_o = F.tanh(c0_o).squeeze(3)
         c0_o = c0_o.transpose(1, 2)
-
         a0_o = self.a0(c0_o, mask.unsqueeze(3).repeat(1, 1, 1, self.config.num_of_filters).view(-1,
                                                                                                 self.config.max_length_sent,
                                                                                                 self.config.num_of_filters))

@@ -20,7 +20,7 @@ class Conv(nn.Module):
         super(Conv, self).__init__()
         self.config = config
         # self.conv = nn.Conv1d(input_size, hidden_size, kernel_size, padding=int((kernel_size-1)/2))
-        self.conv = nn.Conv1d(input_size, hidden_size, kernel_size)
+        self.conv = nn.Conv2d(input_size, hidden_size, kernel_size)
     def forward(self, input):
         output = self.conv(input)
         return output
