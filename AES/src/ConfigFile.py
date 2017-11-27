@@ -11,7 +11,7 @@ class Configuration():
 
         self.dropout = 0.5
         self.output_size = 4
-        self.epochs = 50
+        self.epochs = 100
         self.init_lr = 0.5
 
         self.max_num_sent = 0
