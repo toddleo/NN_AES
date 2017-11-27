@@ -188,8 +188,8 @@ if __name__ == '__main__':
     # criterion = nn.MSELoss()
     # optimizer = O.Adadelta(model.parameters(), config.init_lr)
     # optimizer = O.Adam(model.parameters())
-    # optimizer = O.SGD(model.parameters(), lr = 0.01)
-    optimizer = O.RMSprop(model.parameters(), lr=0.001, momentum=0.9)
+    optimizer = O.SGD(model.parameters(), lr = 0.01)
+    # optimizer = O.RMSprop(model.parameters(), lr=0.001, momentum=0.9)
 
     for epoch in range(0, config.epochs):
         total_loss = 0
