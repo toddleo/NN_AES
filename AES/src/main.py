@@ -219,7 +219,10 @@ if __name__ == '__main__':
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), 0.25)
             optimizer.step()
-            print(loss.data[0])
+            if loss.data[0] > 10:
+                print(loss.data[0])
+                print(F.sigmoid(output))
+                print(one_hot_label)
             total_loss += loss.data[0] * len(instances)
             numOfBatch += 1
             numOfSamples += len(instances)
