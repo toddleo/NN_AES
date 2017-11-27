@@ -146,7 +146,7 @@ if __name__ == '__main__':
     eos = '<eos>'
     w2i[eos]
     # data = list(readData(file='ASAP4.csv'))
-    data = list(readData(file='ASAP4.csv'))
+    data = list(readData())
     config.max_length_sent = max_length_sent
     config.max_num_sent = max_num_sent
 
