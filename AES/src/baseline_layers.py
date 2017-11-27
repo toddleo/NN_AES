@@ -10,11 +10,16 @@ if torch.cuda.is_available():
 else:
     use_cuda = False
 
+VERY_BIG_NUMBER = 1e30
+VERY_SMALL_NUMBER = 1e-30
+VERY_POSITIVE_NUMBER = VERY_BIG_NUMBER
+VERY_NEGATIVE_NUMBER = -VERY_BIG_NUMBER
 
 class Conv(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size, hidden_size, kernel_size, config):
         super(Conv, self).__init__()
-        self.conv = nn.Conv1d()
+        self.config = config
+        self.conv = nn.Conv1d(input_size, hidden_size, kernel_size, padding=int((kernel_size-1)/2))
 
     def forward(self, input):
         output = self.conv(input)
@@ -22,13 +27,15 @@ class Conv(nn.Module):
 
 
 class Embedding(nn.Module):
-    def __init__(self, input_size, hidden_size, config, n_layers=1):
+    def __init__(self, input_size, hidden_size, config, pretrained_weigth=None, n_layers=1):
         super(Embedding, self).__init__()
         self.n_layers = n_layers
         self.hidden_size = hidden_size
         self.config = config
 
         self.embedding = nn.Embedding(input_size, hidden_size)
+        if pretrained_weigth is not None:
+            self.embedding.weight.data.copy_(torch.from_numpy(pretrained_weigth))
 
     def forward(self, input):
         output = self.embedding(input)
@@ -44,14 +51,14 @@ class Modeling(nn.Module):
         self.dropout_p = dropout_p
 
         # self.embedding = nn.Embedding(input_size, hidden_size)
-        self.bilstm = nn.LSTM(batch_first=True, input_size=input_size, hidden_size=hidden_size, num_layers=n_layers, bidirectional=True)
+        self.bilstm = nn.LSTM(batch_first=True, input_size=input_size, hidden_size=hidden_size, num_layers=n_layers)
         self.dropout = nn.Dropout(self.dropout_p)
 
     def forward(self, input):
         # embedded = self.embedding(input).view(1, 1, -1)
         # output = embedded
-        h_0 = Variable(torch.zeros(2, len(input), self.hidden_size), requires_grad=False)
-        c_0 = Variable(torch.zeros(2, len(input), self.hidden_size), requires_grad=False)
+        h_0 = Variable(torch.zeros(1, len(input), self.hidden_size), requires_grad=False)
+        c_0 = Variable(torch.zeros(1, len(input), self.hidden_size), requires_grad=False)
         h_0 = h_0.cuda() if use_cuda else h_0
         c_0 = c_0.cuda() if use_cuda else c_0
 
@@ -61,13 +68,11 @@ class Modeling(nn.Module):
 
 
 class Attn(nn.Module):
-    def __init__(self, hidden_size, output_size, max_length, config, n_layers=1, dropout_p=0.2):
+    def __init__(self, hidden_size, output_size, config, n_layers=1):
         super(Attn, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.n_layers = n_layers
-        self.dropout_p = dropout_p
-        self.max_length = max_length
         self.config = config
 
         # self.embedding = nn.Embedding(self.output_size, self.hidden_size)
@@ -80,8 +85,9 @@ class Attn(nn.Module):
     def forward(self, input, mask):
         # embedded = self.embedding(input).view(1, 1, -1)
         # embedded = self.dropout(embedded)
-
-        attn_weights = F.softmax(self.attn(input))
+        attn_weights = self.attn(input)
+        attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
+        attn_weights = F.tanh(self.attn(attn_weights))
         # attn_weights.data.masked_fill_(mask, -float('inf'))
 
 
@@ -89,7 +95,7 @@ class Attn(nn.Module):
 
         _sums = attn_weights.sum(-1).unsqueeze(2).expand_as(attn_weights)  # sums per row
         attn_weights = attn_weights.div(_sums)
-        attn_weights = attn_weights * mask
+        # attn_weights = attn_weights * mask
 
         return attn_weights
 

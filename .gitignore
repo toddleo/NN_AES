@@ -103,3 +103,4 @@ ENV/
 AES/.idea
 .DS_Store
 *.pkl
+AES/data/glove.6B.50d.txt
