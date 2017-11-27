@@ -51,7 +51,7 @@ def get_GLOVE_word2vec(glove_path = '../data/', word_emb_size = 50):
 def readData(file='MVP_ALL.csv'):
     global max_num_sent, max_length_sent
     stemmer = stem.porter.PorterStemmer()
-    df = pd.read_csv(mainPath + file, encoding='utf-8')
+    df = pd.read_csv(mainPath + file, encoding='latin-1')
     for index, row in df.iterrows():
         # essay = [line for line in row['text'].split('\n')]
         xyz = 'this is an apple.\nThis is another apple. and I am the king of the world\n\ntow lines.'
