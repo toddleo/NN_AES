@@ -220,6 +220,7 @@ if __name__ == '__main__':
             torch.nn.utils.clip_grad_norm(model.parameters(), 0.25)
             optimizer.step()
             print(loss.data[0])
+            print(output)
             print(F.sigmoid(output))
             print(one_hot_label)
             total_loss += loss.data[0] * len(instances)
