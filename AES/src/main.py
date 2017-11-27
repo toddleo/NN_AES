@@ -125,7 +125,7 @@ def variablelize(instances):
 
 
     inp = torch.unsqueeze(label, 1)
-    inp = inp.cuda() if use_cuda else inp
+    # inp = inp.cuda() if use_cuda else inp
 
     one_hot_label = torch.FloatTensor(len(instances), config.output_size).zero_()
     one_hot_label = one_hot_label.cuda() if use_cuda else one_hot_label
