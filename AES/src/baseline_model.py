@@ -24,7 +24,7 @@ class BaseLineModel (nn.Module):
 
     def forward(self, input, mask, num_sent, sent_lengths, outputAttn=False):
         # mask = mask.unsqueeze(3).repeat(1, 1, 1, self.config.embedding_output)
-
+        print(input.data.size())
         e0_o = self.e0(input.view(-1, self.config.max_length_sent))
         e0_o = e0_o.transpose(1, 2)
         c0_o = self.c0(e0_o)

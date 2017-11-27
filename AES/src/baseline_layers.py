@@ -19,8 +19,8 @@ class Conv(nn.Module):
     def __init__(self, input_size, hidden_size, kernel_size, config):
         super(Conv, self).__init__()
         self.config = config
-        self.conv = nn.Conv1d(input_size, hidden_size, kernel_size, padding=int((kernel_size-1)/2))
-
+        # self.conv = nn.Conv1d(input_size, hidden_size, kernel_size, padding=int((kernel_size-1)/2))
+        self.conv = nn.Conv1d(input_size, hidden_size, kernel_size)
     def forward(self, input):
         output = self.conv(input)
         return output
@@ -86,7 +86,7 @@ class Attn(nn.Module):
         # embedded = self.embedding(input).view(1, 1, -1)
         # embedded = self.dropout(embedded)
         attn_weights = self.attn(input)
-        attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
+        # attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
         attn_weights = F.tanh(self.attn(attn_weights))
         # attn_weights.data.masked_fill_(mask, -float('inf'))
 
