@@ -184,12 +184,12 @@ if __name__ == '__main__':
     if use_cuda:
         model.cuda()
 
-    criterion = nn.CrossEntropyLoss()
-    # criterion = nn.MSELoss()
+    # criterion = nn.CrossEntropyLoss()
+    criterion = nn.MSELoss()
     # optimizer = O.Adadelta(model.parameters(), config.init_lr)
     # optimizer = O.Adam(model.parameters())
-    optimizer = O.SGD(model.parameters(), lr = 0.01)
-    # optimizer = O.RMSprop(model.parameters(), lr=0.001, momentum=0.9)
+    # optimizer = O.SGD(model.parameters(), lr = 0.01)
+    optimizer = O.RMSprop(model.parameters(), lr=0.001, momentum=0.9)
 
     for epoch in range(0, config.epochs):
         total_loss = 0
@@ -214,8 +214,8 @@ if __name__ == '__main__':
             # values, predict = torch.max(output, 1)
             # output = predict.float()
 
-            # loss = criterion(F.sigmoid(output), one_hot_label)
-            loss = criterion(output, label)
+            loss = criterion(F.sigmoid(output), one_hot_label)
+            # loss = criterion(output, label)
             loss.backward()
             torch.nn.utils.clip_grad_norm(model.parameters(), 0.25)
             optimizer.step()
@@ -239,8 +239,8 @@ if __name__ == '__main__':
                     # predicts.extend(predict)
 
 
-                    # dev_loss = criterion(F.sigmoid(output), one_hot_label)
-                    dev_loss = criterion(output, label)
+                    dev_loss = criterion(F.sigmoid(output), one_hot_label)
+                    # dev_loss = criterion(output, label)
                     total_dev_loss += dev_loss.data[0] * len(dev_instances)
 
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
@@ -257,9 +257,9 @@ if __name__ == '__main__':
 
             output = model.forward(data, mask, num_sent, sent_lengths)
 
-            # values, predict = torch.max(F.sigmoid(output), 1)
+            values, predict = torch.max(F.sigmoid(output), 1)
 
-            values, predict = torch.max(F.softmax(output), 1)
+            # values, predict = torch.max(F.softmax(output), 1)
             predict = predict.cpu().data.numpy()
             predicts.extend(predict)
             # attentions.extend(test_attention)
