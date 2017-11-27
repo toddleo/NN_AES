@@ -215,7 +215,7 @@ if __name__ == '__main__':
             # output = predict.float()
 
             # loss = criterion(F.sigmoid(output), one_hot_label)
-            loss = criterion(output, one_hot_label)
+            loss = criterion(output, label)
             loss.backward()
             optimizer.step()
 
@@ -237,8 +237,9 @@ if __name__ == '__main__':
                     # predict = predict.cpu().data.numpy()
                     # predicts.extend(predict)
 
+                    
                     # dev_loss = criterion(F.sigmoid(output), one_hot_label)
-                    dev_loss = criterion(output, one_hot_label)
+                    dev_loss = criterion(output, label)
                     total_dev_loss += dev_loss.data[0] * len(dev_instances)
 
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
