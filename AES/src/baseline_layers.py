@@ -81,6 +81,7 @@ class Attn(nn.Module):
 
         # self.embedding = nn.Embedding(self.output_size, self.hidden_size)
         self.attn = nn.Linear(self.hidden_size, self.output_size)
+        self.attn2 = nn.Linear(self.output_size, self.output_size, bias=False)
         # self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
         # self.dropout = nn.Dropout(self.dropout_p)
         # self.gru = nn.GRU(self.hidden_size, self.hidden_size)
@@ -93,17 +94,18 @@ class Attn(nn.Module):
         # if mask is not None:
         #     attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
         attn_weights = F.tanh(self.attn(attn_weights))
-        attn_weights = F.softmax(attn_weights)
+        attn_weights2 = self.attn2(attn_weights)
+        attn_weights = F.softmax(attn_weights2)
         # attn_weights.data.masked_fill_(mask, -float('inf'))
 
 
 
 
-        _sums = attn_weights.sum(-1).unsqueeze(2).expand_as(attn_weights)  # sums per row
-        attn_weights = attn_weights.div(_sums)
+        _sums = attn_weights2.sum(-1).unsqueeze(2).expand_as(attn_weights2)  # sums per row
+        attn_weights2 = attn_weights2.div(_sums)
         # attn_weights = attn_weights * mask
 
-        return attn_weights
+        return attn_weights2
 
 
 class Output(nn.Module):
