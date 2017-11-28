@@ -90,8 +90,8 @@ class Attn(nn.Module):
         # embedded = self.embedding(input).view(1, 1, -1)
         # embedded = self.dropout(embedded)
         attn_weights = self.attn(input)
-        if mask is not None:
-            attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
+        # if mask is not None:
+        #     attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
         attn_weights = F.tanh(self.attn(attn_weights))
         attn_weights = F.softmax(attn_weights)
         # attn_weights.data.masked_fill_(mask, -float('inf'))
