@@ -93,6 +93,7 @@ class Attn(nn.Module):
         if mask is not None:
             attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
         attn_weights = F.tanh(self.attn(attn_weights))
+        attn_weights = F.softmax(attn_weights)
         # attn_weights.data.masked_fill_(mask, -float('inf'))
 
 
