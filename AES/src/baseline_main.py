@@ -166,7 +166,7 @@ if __name__ == '__main__':
         widx2vec_dict = {w2i[word]: vec for word, vec in word2vec_dict.items() if word in w2i}
         emb_mat = np.array([widx2vec_dict[wid] if wid in widx2vec_dict
                             else np.random.multivariate_normal(np.zeros(config.embedding_output), np.eye(config.embedding_output))
-                            for wid in range(config.vocab_size+1)])
+                            for wid in range(config.vocab_size)])
         config.emb_mat = emb_mat
         with open('../data/emb_mat.pkl', 'wb') as f:
             pickle.dump(emb_mat, f)
