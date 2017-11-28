@@ -7,7 +7,7 @@ class Configuration():
         self.needCreateEM = True
         self.localGlove = 'glove.6B.50d.txt'
         self.window_size = 5
-        self.num_of_filters = 50
+        self.num_of_filters = 500
         self.clip_grad = 0.25
         self.print_every_batch = 50
 
