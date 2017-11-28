@@ -19,8 +19,9 @@ class Conv(nn.Module):
     def __init__(self, input_size, hidden_size, kernel_size, config):
         super(Conv, self).__init__()
         self.config = config
+        self.conv = nn.Conv1d(input_size, hidden_size, kernel_size)
         # self.conv = nn.Conv1d(input_size, hidden_size, kernel_size, padding=int((kernel_size-1)/2))
-        self.conv = nn.Conv2d(input_size, hidden_size, kernel_size)
+        # self.conv = nn.Conv2d(input_size, hidden_size, kernel_size)
     def forward(self, input):
         output = self.conv(input)
         return output
@@ -55,7 +56,7 @@ class Modeling(nn.Module):
 
         # self.embedding = nn.Embedding(input_size, hidden_size)
         self.bilstm = nn.LSTM(batch_first=True, input_size=input_size, hidden_size=hidden_size, num_layers=n_layers)
-        self.dropout = nn.Dropout(self.dropout_p)
+        # self.dropout = nn.Dropout(self.dropout_p)
 
     def forward(self, input):
         # embedded = self.embedding(input).view(1, 1, -1)
@@ -66,7 +67,7 @@ class Modeling(nn.Module):
         c_0 = c_0.cuda() if use_cuda else c_0
 
         outputs, (h_n, c_n) = self.bilstm(input, (h_0, c_0))
-        outputs = self.dropout(outputs)
+        # outputs = self.dropout(outputs)
         return outputs
 
 
