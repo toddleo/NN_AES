@@ -27,15 +27,17 @@ class Conv(nn.Module):
 
 
 class Embedding(nn.Module):
-    def __init__(self, input_size, hidden_size, config, pretrained_weigth=None, n_layers=1):
+    def __init__(self, input_size, hidden_size, config, pretrained_weigth=None, dropout_p = 0.2, n_layers=1):
         super(Embedding, self).__init__()
         self.n_layers = n_layers
         self.hidden_size = hidden_size
         self.config = config
+        self.dropout_p = dropout_p
 
         self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
         if pretrained_weigth is not None:
             self.embedding.weight.data.copy_(torch.from_numpy(pretrained_weigth))
+        self.dropout = nn.Dropout(self.dropout_p)
 
     def forward(self, input):
         output = self.embedding(input)

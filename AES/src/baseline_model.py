@@ -14,7 +14,7 @@ class BaseLineModel (nn.Module):
     def __init__(self, config):
         super(BaseLineModel, self).__init__()
         self.config = config
-        self.e0 = Embedding(config.vocab_size, config.embedding_output, config)
+        self.e0 = Embedding(config.vocab_size, config.embedding_output, config, config.emb_mat, config.dropout)
         self.c0 = Conv(1, config.num_of_filters, (config.window_size, config.embedding_output), config)
         # self.c0 = Conv(config.embedding_output, config.num_of_filters, config.window_size, config)
 
