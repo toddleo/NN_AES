@@ -1,7 +1,7 @@
 class Configuration():
     def __init__(self):
         self.batch_size = 10
-        self.test_batch_size = 10
+        self.test_batch_size = 1
         self.hidden_size = 100
         self.embedding_output = 50
         self.needCreateEM = True
@@ -10,7 +10,7 @@ class Configuration():
         self.num_of_filters = 100
 
         self.dropout = 0.5
-        self.output_size = 4
+        self.output_size = 1
         self.epochs = 100
         self.init_lr = 0.5
 

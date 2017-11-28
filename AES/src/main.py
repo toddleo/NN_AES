@@ -67,7 +67,7 @@ def readData(file='MVP_ALL.csv'):
         max_length_sent = max(max_length_sent, len(max(essay, key=len)))
 
         mask = [np.ones(len(sent), dtype=np.int) for sent in essay]
-        num_sent = len(sents)
+        num_sent = len(essay)
         sent_lengths = [len(sent) for sent in essay]
         yield [essay, row['score'], row['text'], mask, num_sent, sent_lengths]
         # if index >= 20:
@@ -99,7 +99,8 @@ def variablelize(instances):
     config.max_length_sent = max_length_sent
 
     data = [[np.pad(sent, (0, config.max_length_sent - len(sent)), 'constant', constant_values=0) for sent in essay[0]] for essay in instances]
-    data = [np.pad(essay, ((0, config.max_num_sent - len(essay)), (0, 0)), 'constant', constant_values=0) for essay in data]
+    data = reduce(lambda x, y: x + y, data)
+    # data = [np.pad(essay, ((0, config.max_num_sent - len(essay)), (0, 0)), 'constant', constant_values=0) for essay in data]
 
     # data = np.asarray(list(instances[:,0]), dtype=np.int)
     data = Variable(LongTensor(np.asarray(data, dtype=np.int)))
@@ -126,17 +127,17 @@ def variablelize(instances):
 
     label = label.cuda() if use_cuda else label
 
-
-
     # inp = inp.cuda() if use_cuda else inp
 
-    one_hot_label = torch.FloatTensor(len(instances), config.output_size).zero_()
+    one_hot_label = torch.FloatTensor(len(instances), 4).zero_()
     # one_hot_label = one_hot_label.cuda() if use_cuda else one_hot_label
     one_hot_label.scatter_(1, inp.data, 1)
     one_hot_label = Variable(FloatTensor(one_hot_label))
     one_hot_label = one_hot_label.cuda() if use_cuda else one_hot_label
-    #print(label)
-    #print(one_hot)
+
+    label = np.asarray([(ins[1] - 1) / 3.0 for ins in instances], dtype=np.float)
+    label = Variable(FloatTensor(label))
+    label = label.cuda() if use_cuda else label
 
     return data, mask, label, num_sent, sent_lengths, one_hot_label
 
@@ -145,8 +146,8 @@ if __name__ == '__main__':
     w2i = defaultdict(lambda: len(w2i))
     eos = '<eos>'
     w2i[eos]
-    data = list(readData(file='ASAP4.csv'))
-    # data = list(readData())
+    # data = list(readData(file='ASAP4.csv'))
+    data = list(readData())
     config.max_length_sent = max_length_sent
     config.max_num_sent = max_num_sent
 
@@ -214,7 +215,7 @@ if __name__ == '__main__':
             # values, predict = torch.max(output, 1)
             # output = predict.float()
 
-            loss = criterion(F.sigmoid(output), one_hot_label)
+            loss = criterion(F.sigmoid(output), label)
             # loss = criterion(output, label)
             loss.backward()
             # torch.nn.utils.clip_grad_norm(model.parameters(), 0.1)
@@ -242,7 +243,7 @@ if __name__ == '__main__':
                     # predicts.extend(predict)
 
 
-                    dev_loss = criterion(F.sigmoid(output), one_hot_label)
+                    dev_loss = criterion(F.sigmoid(output), label)
                     # dev_loss = criterion(output, label)
                     total_dev_loss += dev_loss.data[0] * len(dev_instances)
 
@@ -260,13 +261,13 @@ if __name__ == '__main__':
 
             output = model.forward(data, mask, num_sent, sent_lengths)
 
-            values, predict = torch.max(F.sigmoid(output), 1)
-
+            # values, predict = torch.max(F.sigmoid(output), 1)
+            predict = F.sigmoid(output)
             # values, predict = torch.max(F.softmax(output), 1)
             predict = predict.cpu().data.numpy()
-            predicts.extend(predict)
+            predicts.extend((predict*3.0).round())
             # attentions.extend(test_attention)
-
+        # predicts = [(i*3.0).round() for i in predicts]
         qwkappa = sklm.cohen_kappa_score([ins[1] - 1 for ins in testset], predicts, labels=[0, 1, 2, 3],
                                          weights='quadratic')
         torch.save(model.state_dict(), '../models/' + str(epoch) + '.pkl')

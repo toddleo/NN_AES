@@ -22,29 +22,38 @@ class BaseLineModel (nn.Module):
         self.a0 = Attn(config.num_of_filters, config.num_of_filters, config)
         self.m0 = Modeling(config.num_of_filters, config.hidden_size, config)
         self.a1 = Attn(config.hidden_size, config.hidden_size, config)
-        self.o0 = Output(config.hidden_size, config)
+        self.o0 = Output(config.hidden_size, config, config.output_size)
 
     def forward(self, input, mask, num_sent, sent_lengths, outputAttn=False):
         # mask = mask.unsqueeze(3).repeat(1, 1, 1, self.config.embedding_output)
         # print(input.data.size())
-        e0_o = self.e0(input.view(-1, self.config.max_length_sent))
-        #e0_o = e0_o.transpose(1, 2)
+        e0_o = self.e0(input)
+        # e0_o = e0_o.transpose(1, 2)
         e0_o = e0_o.unsqueeze(1)
         c0_o = self.c0(e0_o)
-        #c0_o = c0_o.transpose(1, 2)
-        c0_o = F.tanh(c0_o).squeeze(3)
         c0_o = c0_o.transpose(1, 2)
-        a0_o = self.a0(c0_o, mask.unsqueeze(3).repeat(1, 1, 1, self.config.num_of_filters).view(-1,
-                                                                                                self.config.max_length_sent,
-                                                                                                self.config.num_of_filters))
+        c0_o = F.tanh(c0_o).squeeze(3)
+        # c0_o = c0_o.transpose(1, 2)
+        a0_o = self.a0(c0_o)
 
         s0_o = a0_o * c0_o
         s0_o = s0_o.sum(1)
-        s0_o = s0_o.view(len(input), self.config.max_num_sent, -1)
+        # s0_o = s0_o.view(len(input), self.config.max_num_sent, -1)
+
         # a0_o = self.a0(e0_o, mask)
         # print(a0_o.data.size())
+        t0_o = torch.zeros(len(num_sent), self.config.max_num_sent, self.config.num_of_filters)
 
-        m0_o = self.m0(s0_o)
+        count = 0
+        for i in range(len(num_sent)):
+            for j in range(num_sent[i]):
+
+                t0_o[i][j] = s0_o.data[count]
+                count = count + 1
+        t0_o = Variable(t0_o)
+        t0_o = t0_o.cuda() if use_cuda else t0_o
+
+        m0_o = self.m0(t0_o)
         a1_o = self.a1(m0_o, mask.select(2, 0).unsqueeze(2).repeat(1, 1, self.config.hidden_size))
 
         s1_o = a1_o * m0_o

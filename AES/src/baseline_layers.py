@@ -33,7 +33,7 @@ class Embedding(nn.Module):
         self.hidden_size = hidden_size
         self.config = config
 
-        self.embedding = nn.Embedding(input_size, hidden_size)
+        self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
         if pretrained_weigth is not None:
             self.embedding.weight.data.copy_(torch.from_numpy(pretrained_weigth))
 
@@ -82,11 +82,12 @@ class Attn(nn.Module):
         # self.gru = nn.GRU(self.hidden_size, self.hidden_size)
         # self.out = nn.Linear(self.hidden_size, self.output_size)
 
-    def forward(self, input, mask):
+    def forward(self, input, mask=None):
         # embedded = self.embedding(input).view(1, 1, -1)
         # embedded = self.dropout(embedded)
         attn_weights = self.attn(input)
-        # attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
+        if mask is not None:
+            attn_weights = attn_weights + ((mask - 1) * VERY_POSITIVE_NUMBER)
         attn_weights = F.tanh(self.attn(attn_weights))
         # attn_weights.data.masked_fill_(mask, -float('inf'))
 
