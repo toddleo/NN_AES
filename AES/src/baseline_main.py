@@ -135,9 +135,9 @@ def variablelize(instances):
     one_hot_label = Variable(FloatTensor(one_hot_label))
     one_hot_label = one_hot_label.cuda() if use_cuda else one_hot_label
 
-    # label = np.asarray([(ins[1] - 1) / 3.0 for ins in instances], dtype=np.float)
-    # label = Variable(FloatTensor(label))
-    # label = label.cuda() if use_cuda else label
+    label = np.asarray([(ins[1] - 1) / 3.0 for ins in instances], dtype=np.float)
+    label = Variable(FloatTensor(label))
+    label = label.cuda() if use_cuda else label
 
     return data, mask, label, num_sent, sent_lengths, one_hot_label
 
@@ -180,17 +180,17 @@ if __name__ == '__main__':
 
     devset, testset = split(devtest, test_size=0.5)
 
-    # model = BaseLineModel(config)
-    model = AESModel(config)
+    model = BaseLineModel(config)
+    # model = AESModel(config)
     if use_cuda:
         model.cuda()
 
-    criterion = nn.CrossEntropyLoss()
-    # criterion = nn.MSELoss()
+    # criterion = nn.CrossEntropyLoss()
+    criterion = nn.MSELoss()
     # optimizer = O.Adadelta(model.parameters(), config.init_lr)
-    optimizer = O.Adam(model.parameters())
+    # optimizer = O.Adam(model.parameters())
     # optimizer = O.SGD(model.parameters(), lr = 0.01)
-    # optimizer = O.RMSprop(model.parameters(), lr=0.0001, momentum=0.9)
+    optimizer = O.RMSprop(model.parameters(), lr=0.0001, momentum=0.9)
 
     for epoch in range(0, config.epochs):
         total_loss = 0
@@ -215,8 +215,8 @@ if __name__ == '__main__':
             # values, predict = torch.max(output, 1)
             # output = predict.float()
 
-            # loss = criterion(F.sigmoid(output), label)
-            loss = criterion(output, label)
+            loss = criterion(F.sigmoid(output), label)
+            # loss = criterion(output, label)
             loss.backward()
             # torch.nn.utils.clip_grad_norm(model.parameters(), config.clip_grad)
             optimizer.step()
@@ -243,8 +243,8 @@ if __name__ == '__main__':
                     # predicts.extend(predict)
 
 
-                    # dev_loss = criterion(F.sigmoid(output), label)
-                    dev_loss = criterion(output, label)
+                    dev_loss = criterion(F.sigmoid(output), label)
+                    # dev_loss = criterion(output, label)
                     total_dev_loss += dev_loss.data[0] * len(dev_instances)
 
                 print (str(epoch) + " , " + str(numOfSamples) + ' / ' + str(len(trainset)) + " , Current loss : " + str(
@@ -262,10 +262,10 @@ if __name__ == '__main__':
             output = model.forward(data, mask, num_sent, sent_lengths)
 
             # values, predict = torch.max(F.sigmoid(output), 1)
-            # predict = F.sigmoid(output)
-            values, predict = torch.max(F.softmax(output), 1)
+            predict = F.sigmoid(output)
+            # values, predict = torch.max(F.softmax(output), 1)
             predict = predict.cpu().data.numpy()
-            predicts.extend(predict)
+            predicts.extend((predict*3.0).round())
             # attentions.extend(test_attention)
         # predicts = [(i*3.0).round() for i in predicts]
         qwkappa = sklm.cohen_kappa_score([ins[1] - 1 for ins in testset], predicts, labels=[0, 1, 2, 3],
