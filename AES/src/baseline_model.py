@@ -18,7 +18,7 @@ class BaseLineModel (nn.Module):
         self.c0 = Conv(1, config.num_of_filters, (config.window_size, config.embedding_output), config)
         # self.c0 = Conv(config.embedding_output, config.num_of_filters, config.window_size, config)
 
-        # self.m0 = Modeling(config.embedding_output, config.hidden_size, config)
+        self.m0 = Modeling(config.embedding_output, config.hidden_size, config)
         self.a0 = Attn(config.num_of_filters, config.num_of_filters, config)
         self.m0 = Modeling(config.num_of_filters, config.hidden_size, config)
         self.a1 = Attn(config.hidden_size, config.hidden_size, config)
@@ -29,10 +29,15 @@ class BaseLineModel (nn.Module):
         # print(input.data.size())
         e0_o = self.e0(input)
         # e0_o = e0_o.transpose(1, 2)
+
+        '''
         e0_o = e0_o.unsqueeze(1)
         c0_o = self.c0(e0_o)
         c0_o = c0_o.transpose(1, 2)
         c0_o = F.tanh(c0_o).squeeze(3)
+        '''
+
+        c0_o = self.m0(e0_o)
         # c0_o = c0_o.transpose(1, 2)
         a0_o = self.a0(c0_o)
 
