@@ -34,6 +34,7 @@ class BaseLineModel (nn.Module):
         # e0_o = e0_o.unsqueeze(1)
         c0_o = self.c0(e0_o)
         c0_o = c0_o.transpose(1, 2)
+        c0_o = F.tanh(c0_o)
         # c0_o = F.tanh(c0_o).squeeze(3)
 
         # c0_o = c0_o.transpose(1, 2)
