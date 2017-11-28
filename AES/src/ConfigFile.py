@@ -9,6 +9,7 @@ class Configuration():
         self.window_size = 5
         self.num_of_filters = 100
         self.clip_grad = 0.25
+        self.print_every_batch = 500
 
         self.dropout = 0.5
         self.output_size = 1
