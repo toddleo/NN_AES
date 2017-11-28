@@ -227,7 +227,7 @@ if __name__ == '__main__':
             total_loss += loss.data[0] * len(instances)
             numOfBatch += 1
             numOfSamples += len(instances)
-            if numOfBatch % config.print_every_batch == 0:
+            if numOfBatch % config.print_every_batch == 0 or numOfSamples == len(trainset):
                 end = time.time()
                 total_dev_loss = 0
                 predicts = []
