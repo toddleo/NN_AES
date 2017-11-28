@@ -218,7 +218,7 @@ if __name__ == '__main__':
             loss = criterion(F.sigmoid(output), label)
             # loss = criterion(output, label)
             loss.backward()
-            # torch.nn.utils.clip_grad_norm(model.parameters(), 0.1)
+            torch.nn.utils.clip_grad_norm(model.parameters(), config.clip_grad)
             optimizer.step()
             # print(loss.data[0])
             # print(output)
